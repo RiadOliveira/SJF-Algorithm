@@ -33,7 +33,7 @@ public class Scheduler {
 
     private void waitOneSecondToCreateMoreProcesses(int processesQuantity) {
         try {
-            Thread.sleep(1);
+            Thread.sleep(1000);
             createProcesses(processesQuantity);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -48,7 +48,7 @@ public class Scheduler {
 
         try {
             process.showHelloMessage();
-            Thread.sleep(executionTime * 1);
+            Thread.sleep(executionTime * 1000);
             process.run(executionTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
