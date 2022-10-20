@@ -13,22 +13,15 @@ public class Scheduler {
         createProcesses(4);
 
         int iterationIndex = 0;
-        Process previousProcessExecuted = null;
-        while(!processesList.isEmpty() || previousProcessExecuted != null) {
-            Process higherPriorityProcess = removeFirst();
-            if(previousProcessExecuted != null) add(previousProcessExecuted);
-
+        while(!processesList.isEmpty()) {
             if(iterationIndex == 3) waitOneSecondToCreateMoreProcesses(8);
             if(iterationIndex == 6) waitOneSecondToCreateMoreProcesses(16);
 
-            if(higherPriorityProcess == null) previousProcessExecuted = null;
-            else {
-                executeProcess(higherPriorityProcess);
-                previousProcessExecuted = 
-                    higherPriorityProcess.hasFullyExecuted() ? null : higherPriorityProcess;
-    
-                iterationIndex++;
-            }
+            Process higherPriorityProcess = removeFirst();
+            executeProcess(higherPriorityProcess);
+            if(!higherPriorityProcess.hasFullyExecuted()) add(higherPriorityProcess);
+
+            iterationIndex++;
         }
     }
 
@@ -40,7 +33,7 @@ public class Scheduler {
 
     private void waitOneSecondToCreateMoreProcesses(int processesQuantity) {
         try {
-            Thread.sleep(1000);
+            Thread.sleep(1);
             createProcesses(processesQuantity);
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -55,7 +48,7 @@ public class Scheduler {
 
         try {
             process.showHelloMessage();
-            Thread.sleep(executionTime * 1000);
+            Thread.sleep(executionTime * 1);
             process.run(executionTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
