@@ -60,12 +60,17 @@ public class Scheduler {
         riseProcess(processesList.size() - 1);
     }
 
+    private Process getProcessAtPosition(int index) {
+        if(index >= processesList.size() || index < 0) return null;
+        return processesList.get(index);
+    }
+
     private Process removeFirst() {
         if(processesList.size() == 0) return null;
 
         int lowerPriorityProcessIndex = processesList.size() - 1;
-        Process higherPriorityProcess = processesList.get(0);
-        Process lowerPriorityProcess = processesList.get(
+        Process higherPriorityProcess = getProcessAtPosition(0);
+        Process lowerPriorityProcess = getProcessAtPosition(
             lowerPriorityProcessIndex
         );
 
@@ -77,8 +82,8 @@ public class Scheduler {
     }
 
     private void exchangePositions(int firstIndex, int secondIndex) {
-        Process firstProcess = processesList.get(firstIndex);
-        Process secondProcess = processesList.get(secondIndex);
+        Process firstProcess = getProcessAtPosition(firstIndex);
+        Process secondProcess = getProcessAtPosition(secondIndex);
 
         processesList.set(firstIndex, secondProcess);
         processesList.set(secondIndex, firstProcess);
@@ -87,9 +92,9 @@ public class Scheduler {
     private void riseProcess(int processIndex) {
         if(processIndex == 0) return;
 
-        Process process = processesList.get(processIndex);
-        int parentIndex = processIndex/2;
-        Process parentProcess = processesList.get(parentIndex);
+        Process process = getProcessAtPosition(processIndex);
+        int parentIndex = (processIndex + 1)/2 - 1;
+        Process parentProcess = getProcessAtPosition(parentIndex);
 
         if(process.hasBiggerPriorityThan(parentProcess)) {
             exchangePositions(processIndex, parentIndex);
@@ -97,35 +102,25 @@ public class Scheduler {
         }
     }
 
-    private boolean exchangeChildAndParentPositionIfChildIsHigherPriority(
-        int childIndex, int parentIndex
-    ) {
-        Process parentProcess = processesList.get(parentIndex);
-        Process childProcess = processesList.get(childIndex);
-        
-        boolean needsExchange = childProcess.hasBiggerPriorityThan(parentProcess);
-        if(needsExchange) {
-            exchangePositions(parentIndex, childIndex);
-            descendProcess(childIndex);
-        }
-
-        return needsExchange;
-    }
-
     private void descendProcess(int processIndex) {
-        int leftChildIndex = processIndex * 2;
+        int leftChildIndex = (processIndex + 1) * 2 - 1;
         if(leftChildIndex > processesList.size() - 1) return;
 
-        boolean exchangeWasExecuted = exchangeChildAndParentPositionIfChildIsHigherPriority(
-            leftChildIndex, processIndex
-        );
-        if(exchangeWasExecuted) return;
-
+        Process leftChild = getProcessAtPosition(leftChildIndex);
         int rightChildIndex = leftChildIndex + 1;
-        if(rightChildIndex > processesList.size() - 1) return;
+        Process rightChild = getProcessAtPosition(rightChildIndex);
 
-        exchangeChildAndParentPositionIfChildIsHigherPriority(
-            rightChildIndex, processIndex
-        );
+        boolean leftChildHasBiggerPriority = leftChild.hasBiggerPriorityThan(rightChild);
+        int higherPriorityChildIndex = 
+            leftChildHasBiggerPriority ? leftChildIndex : rightChildIndex;
+        Process higherPriorityChildProcess = 
+            leftChildHasBiggerPriority ? leftChild : rightChild;
+
+        Process process = getProcessAtPosition(processIndex);
+        boolean needsExchange = higherPriorityChildProcess.hasBiggerPriorityThan(process);
+        if(needsExchange) {
+            exchangePositions(processIndex, higherPriorityChildIndex);
+            descendProcess(higherPriorityChildIndex);
+        }
     }
 }
