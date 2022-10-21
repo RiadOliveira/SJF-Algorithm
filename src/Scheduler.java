@@ -14,11 +14,11 @@ public class Scheduler {
 
         int iterationIndex = 0;
         while(!processesList.isEmpty()) {
+            Process higherPriorityProcess = removeFirst();
             if(iterationIndex == 3) waitOneSecondToCreateMoreProcesses(8);
             if(iterationIndex == 6) waitOneSecondToCreateMoreProcesses(16);
 
-            Process higherPriorityProcess = removeFirst();
-            executeProcess(higherPriorityProcess);
+            executeProcess(higherPriorityProcess, iterationIndex == 3 || iterationIndex == 6);
             if(!higherPriorityProcess.hasFullyExecuted()) add(higherPriorityProcess);
 
             iterationIndex++;
@@ -40,7 +40,7 @@ public class Scheduler {
         }
     }
 
-    private void executeProcess(Process process) {
+    private void executeProcess(Process process, boolean sleepOneLessSecond) {
         int processRemainingTime = process.getRemainingTime();
         int executionTime = 
             processRemainingTime < DEFAULT_PROCESS_EXECUTION_TIME ? 
@@ -48,7 +48,7 @@ public class Scheduler {
 
         try {
             process.showHelloMessage();
-            Thread.sleep(executionTime * 1000);
+            Thread.sleep((executionTime - (sleepOneLessSecond ? 1 : 0)) * 1000);
             process.run(executionTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
